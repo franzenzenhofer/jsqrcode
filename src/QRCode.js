@@ -28,9 +28,16 @@ qrcode.callback = null;
 
 qrcode.decode = function(src){
 	
-	if(arguments.length==0)
+	if((arguments.length==0) || (arguments.length==1 && src.nodeName=='CANVAS')) 
 	{
-		var canvas_qr = document.getElementById("qr-canvas");
+	  if(arguments.length==1 && src.nodeName=='CANVAS')
+	  {
+		  var canvas_qr = src;
+		}
+		else
+		{
+		  var canvas_qr = document.getElementById("qr-canvas");
+		}
 		var context = canvas_qr.getContext('2d');
 		qrcode.width = canvas_qr.width;
 		qrcode.height = canvas_qr.height;
@@ -40,7 +47,7 @@ qrcode.decode = function(src){
             qrcode.callback(qrcode.result);
 		return qrcode.result;
 	}
-	else
+  else
 	{
 		var image = new Image();
 		image.onload=function(){
@@ -62,7 +69,9 @@ qrcode.decode = function(src){
 			try{
 				qrcode.imagedata = context.getImageData(0, 0, image.width, image.height);
 			}catch(e){
-				qrcode.result = "Cross domain image reading not supported in your browser! Save it to your computer then drag and drop the file!";
+				//qrcode.result = "Cross domain image reading not supported in your browser! Save it to your computer then drag and drop the file!";
+				throw(e)
+				qrcode.result = false
 				if(qrcode.callback!=null)
 					qrcode.callback(qrcode.result);
 				return;
@@ -74,8 +83,14 @@ qrcode.decode = function(src){
             }
             catch(e)
             {
-				console.log(e);
-                qrcode.result = "error decoding QR Code";
+				//console.log(e);
+                //qrcode.result = "error decoding QR Code";
+                throw(e);
+                
+            }
+            finally
+            {
+              qrcode.result = false;
             }
 			if(qrcode.callback!=null)
 				qrcode.callback(qrcode.result);
